@@ -4,7 +4,11 @@ import java.util.List;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
+import lombok.NonNull;
+
 @NoRepositoryBean
 public interface BaseRepository<T> extends CrudRepository<T, Long> {
-    List<T> findAll();
+    @SuppressWarnings("null")
+    @NonNull
+    List<@NonNull T> findAll();
 }
