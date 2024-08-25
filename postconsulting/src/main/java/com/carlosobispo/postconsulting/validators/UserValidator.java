@@ -20,9 +20,11 @@ public class UserValidator implements Validator {
     }
 
     @Override
+    @SuppressWarnings("null")
     public boolean supports(Class<?> clazz) {
         return User.class.equals(clazz);
     }
+    @SuppressWarnings("null")
     @Override
     public void validate(Object target, Errors errors) {
         User user = (User) target;
