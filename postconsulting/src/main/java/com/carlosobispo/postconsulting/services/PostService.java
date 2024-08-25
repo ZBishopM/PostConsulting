@@ -37,4 +37,8 @@ public class PostService extends BaseService<Post> {
         post.setPostedDateFormatted(formatter.format(Instant.now()));
         return postRepository.save(post);
     }
+
+    public List<Post> findByUsername(String email) {
+        return postRepository.findByUserEmail(email);
+    }
 }
