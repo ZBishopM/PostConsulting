@@ -3,7 +3,11 @@ package com.carlosobispo.postconsulting.controllers;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,15 +15,28 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.carlosobispo.postconsulting.models.User;
 import com.carlosobispo.postconsulting.services.UserService;
+import com.carlosobispo.postconsulting.validators.UserValidator;
+
+import jakarta.validation.Valid;
+
 
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
     private final UserService userService;
-
-    public UserController(UserService userService) {
+    private final UserValidator userValidator;
+    
+    public UserController(UserService userService, UserValidator userValidator) {
         this.userService = userService;
+        this.userValidator = userValidator;
+    }
+
+    @InitBinder
+    private void initBinder(WebDataBinder webDataBinder) {
+        Validator val =webDataBinder.getValidator();
+        webDataBinder.setValidator(userValidator);
+        webDataBinder.addValidators(val);
     }
 
     @GetMapping("")
@@ -32,11 +49,14 @@ public class UserController {
     }
     
     @PostMapping("")
-    public ResponseEntity<User> addUser(@RequestBody User user) {
+    public ResponseEntity<User> addUser(@Valid @RequestBody User user, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.badRequest().build();
+        }
         User savedUser = userService.save(user);
         if (savedUser != null) {
             return ResponseEntity.ok(savedUser);
         }
-        return ResponseEntity.badRequest().build();
+        return ResponseEntity.notFound().build();
     }
 }
