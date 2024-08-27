@@ -34,9 +34,10 @@ public class UserValidator implements Validator {
             return;
         }
         //TODO: validate password missmatch
-        /* if (passwordsMismatch(user)) {
+        if (passwordsMismatch(user)) {
             errors.rejectValue("passwordConfirmation", "USER_PASSWORDS_MISMATCH");
-        } */
+            return;
+        }
     }
 
     public boolean passwordsMismatch(User user) {
