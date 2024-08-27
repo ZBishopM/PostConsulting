@@ -47,7 +47,7 @@ public class User extends BaseModel {
 
     Boolean subscribed;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Post> posts;
     
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
