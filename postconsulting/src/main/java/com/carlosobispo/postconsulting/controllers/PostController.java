@@ -26,6 +26,7 @@ public class PostController {
     @GetMapping("")
     public ResponseEntity<List<Post>> getPosts() {
         List<Post> posts = postService.findAll();
+        postService.countStats(posts);
         if (posts != null && !posts.isEmpty()) {
             return ResponseEntity.ok(posts);
         }
@@ -58,4 +59,24 @@ public class PostController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/delete/{id}")
+    public ResponseEntity<Post> deleteUser(@PathVariable Long id) {
+        postService.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/edit/{id}")
+    public ResponseEntity<Post> editPost(@RequestBody Post post,@PathVariable Long id) {
+        Post oldPost =postService.findById(id);
+        if (oldPost != null) {
+            post.setId(oldPost.getId());
+            Post savedPost = postService.save(post);
+            if (savedPost != null) {
+                return ResponseEntity.ok(savedPost);
+            }
+        }
+        return ResponseEntity.badRequest().build();
+    }
+    
 }

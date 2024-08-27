@@ -32,7 +32,12 @@ public class Post extends BaseModel{
 
     @Transient
     private String postedDateFormatted;
+    @Transient
+    private int countLikes;
+    @Transient
+    private int countComments;
     
+    //TODO:make this notNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
