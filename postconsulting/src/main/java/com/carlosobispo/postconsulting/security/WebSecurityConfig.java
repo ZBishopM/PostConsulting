@@ -16,11 +16,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import com.carlosobispo.postconsulting.models.User;
-import com.carlosobispo.postconsulting.models.dto.UserDTO;
-import com.carlosobispo.postconsulting.services.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -28,17 +23,17 @@ import jakarta.servlet.http.HttpServletResponse;
 @EnableWebSecurity
 public class WebSecurityConfig {
         @Autowired
-        private SecurityUserDetails userDetailsService;
+        private SecurityUserDetails securityUserDetails;
 
         @Autowired
-        private UserService userService;
+        private JwtTokenProvider jwtTokenProvider;
 
         @Bean
         public AuthenticationManager authenticationManager(HttpSecurity http,
                         BCryptPasswordEncoder bCryptPasswordEncoder) throws Exception {
                 AuthenticationManagerBuilder authenticationManagerBuilder = http
                                 .getSharedObject(AuthenticationManagerBuilder.class);
-                authenticationManagerBuilder.userDetailsService(userDetailsService)
+                authenticationManagerBuilder.userDetailsService(securityUserDetails)
                                 .passwordEncoder(bCryptPasswordEncoder);
                 return authenticationManagerBuilder.build();
         }
@@ -72,12 +67,21 @@ public class WebSecurityConfig {
                                                 .requestMatchers(HttpMethod.GET, "/home/*", "/home/**").authenticated()
                                                 .requestMatchers(HttpMethod.GET, "/users/*", "/users/**").permitAll()
                                                 .requestMatchers(HttpMethod.POST, "/users/*", "/users/**").permitAll()
-                                                .requestMatchers(HttpMethod.GET, "/posts/*", "/posts/**")
+                                                .requestMatchers(HttpMethod.GET, "/posts/*", "/posts/**").authenticated()
+                                                .requestMatchers(HttpMethod.GET, "/roles/*", "/roles/**")
                                                 .permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/posts/*", "/posts/**").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/posts/*", "/posts/**")
+                                                .hasRole("USER")
+                                                .requestMatchers(HttpMethod.POST, "/comments/*", "/comments/**")
+                                                .authenticated()
                                                 .anyRequest().denyAll())
-                                .addFilterBefore(jsonObjectAuthenticationFilter(authenticationManager),
+                                .addFilterBefore(new JwtTokenFilter(jwtTokenProvider, securityUserDetails),
                                                 UsernamePasswordAuthenticationFilter.class)
+                                .exceptionHandling(exception -> exception
+                                                .authenticationEntryPoint((request, response, authException) -> {
+                                                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                                                                        "Error: Unauthorized");
+                                                }))
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                                                 .maximumSessions(1)
@@ -92,24 +96,5 @@ public class WebSecurityConfig {
                                                 .deleteCookies("JSESSIONID"));
 
                 return http.build();
-        }
-
-        @Bean
-        public JsonObjectAuthenticationFilter jsonObjectAuthenticationFilter(
-                        AuthenticationManager authenticationManager) throws Exception {
-                JsonObjectAuthenticationFilter filter = new JsonObjectAuthenticationFilter(authenticationManager);
-                filter.setFilterProcessesUrl("/login");
-                filter.setAuthenticationSuccessHandler((request, response, authentication) -> {
-                        User user = userService.findByEmail(authentication.getName());
-                        UserDTO userDTO = new UserDTO(user); // Create a DTO with non-sensitive user data
-                        response.setContentType("application/json");
-                        response.getWriter().write(new ObjectMapper().writeValueAsString(userDTO));
-                });
-                filter.setAuthenticationFailureHandler((request, response, exception) -> {
-                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        response.setContentType("application/json");
-                        response.getWriter().write("{\"error\": \"" + exception.getMessage() + "\"}");
-                });
-                return filter;
         }
 }

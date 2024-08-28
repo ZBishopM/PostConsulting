@@ -30,4 +30,8 @@ public class Role extends BaseModel {
     @JsonIgnore
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private List<User> users;
+    
+    public Role(String name) {
+        this.name = name;
+    }
 }
