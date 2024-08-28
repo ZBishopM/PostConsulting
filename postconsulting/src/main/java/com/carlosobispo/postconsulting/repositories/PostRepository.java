@@ -13,4 +13,6 @@ public interface PostRepository extends BaseRepository<Post> {
 
     Post findByUserAndId(User user, Long id);
 
+    List<Post> findByUserEmail(String email);
+
 }

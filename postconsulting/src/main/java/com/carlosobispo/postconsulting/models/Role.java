@@ -2,6 +2,8 @@ package com.carlosobispo.postconsulting.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
@@ -25,6 +27,11 @@ public class Role extends BaseModel {
     @Size(min = 3)
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
     private List<User> users;
+    
+    public Role(String name) {
+        this.name = name;
+    }
 }

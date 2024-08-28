@@ -37,4 +37,18 @@ public class PostService extends BaseService<Post> {
         post.setPostedDateFormatted(formatter.format(Instant.now()));
         return postRepository.save(post);
     }
+
+    public List<Post> findByUsername(String email) {
+        return postRepository.findByUserEmail(email);
+    }
+
+    public List<Post> countStats(List<Post> posts){
+        
+        for (Post post : posts) {
+            post.setCountLikes(post.getPostLikes().size());
+            post.setCountComments(post.getComments().size());
+            post.setPostedDateFormatted(formatter.format(post.getCreatedAt()));
+        }
+        return posts;
+    }
 }

@@ -2,6 +2,8 @@ package com.carlosobispo.postconsulting.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -32,9 +34,15 @@ public class Post extends BaseModel{
 
     @Transient
     private String postedDateFormatted;
+    @Transient
+    private int countLikes;
+    @Transient
+    private int countComments;
     
+    //TODO:make this notNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonBackReference
     private User user;
     
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)

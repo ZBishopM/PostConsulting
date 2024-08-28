@@ -43,11 +43,11 @@ public class User extends BaseModel {
     private String password;
     
     @Transient
-    private String  passwordConfirmation;
+    private String passwordConfirmation;
 
     Boolean subscribed;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<Post> posts;
     
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
@@ -57,7 +57,7 @@ public class User extends BaseModel {
     private List<PostLike> postLikes;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id")
     private Role role;
 }
